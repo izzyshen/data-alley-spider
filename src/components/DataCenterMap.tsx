@@ -8,7 +8,7 @@ import { Button } from './ui/button';
 import { toast } from 'sonner';
 import { createRoot } from 'react-dom/client';
 import { RadarOverlay } from './RadarOverlay';
-import { TimelineOverlay } from './TimelineOverlay';
+import { TimelineLegend } from './TimelineLegend';
 
 export const DataCenterMap = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -65,41 +65,25 @@ export const DataCenterMap = () => {
       // Add markers for each data center
       dataCenters.forEach((dc) => {
         const el = document.createElement('div');
-        el.style.width = '160px';
-        el.style.height = '200px';
+        el.style.width = '100px';
+        el.style.height = '100px';
         el.style.cursor = 'pointer';
         el.style.display = 'flex';
         el.style.alignItems = 'center';
         el.style.justifyContent = 'center';
-        el.style.gap = '8px';
 
         const root = createRoot(el);
-        root.render(
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {dc.timeSeries && <TimelineOverlay timeSeries={dc.timeSeries} isHovered={false} />}
-            <RadarOverlay dataCenter={dc} isHovered={false} />
-          </div>
-        );
+        root.render(<RadarOverlay dataCenter={dc} isHovered={false} />);
 
         el.addEventListener('mouseenter', (e) => {
           setHoveredDataCenter(dc);
           setMousePosition({ x: e.clientX, y: e.clientY });
-          root.render(
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              {dc.timeSeries && <TimelineOverlay timeSeries={dc.timeSeries} isHovered={true} />}
-              <RadarOverlay dataCenter={dc} isHovered={true} />
-            </div>
-          );
+          root.render(<RadarOverlay dataCenter={dc} isHovered={true} />);
         });
 
         el.addEventListener('mouseleave', () => {
           setHoveredDataCenter(null);
-          root.render(
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              {dc.timeSeries && <TimelineOverlay timeSeries={dc.timeSeries} isHovered={false} />}
-              <RadarOverlay dataCenter={dc} isHovered={false} />
-            </div>
-          );
+          root.render(<RadarOverlay dataCenter={dc} isHovered={false} />);
         });
 
         el.addEventListener('mousemove', (e) => {
@@ -165,6 +149,7 @@ export const DataCenterMap = () => {
   return (
     <div className="relative w-full h-screen bg-background">
       <div ref={mapContainer} className="absolute inset-0" />
+      <TimelineLegend />
       {hoveredDataCenter && (
         <DataCenterTooltip
           dataCenter={hoveredDataCenter}
