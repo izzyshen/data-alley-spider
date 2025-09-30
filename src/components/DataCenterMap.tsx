@@ -14,13 +14,15 @@ export const DataCenterMap = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [mapboxToken, setMapboxToken] = useState('');
+  const [shouldLoadMap, setShouldLoadMap] = useState(false);
   const [isMapReady, setIsMapReady] = useState(false);
   const [hoveredDataCenter, setHoveredDataCenter] = useState<DataCenter | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const markersRef = useRef<mapboxgl.Marker[]>([]);
 
-  const initializeMap = () => {
-    if (!mapContainer.current || !mapboxToken) return;
+  // Initialize map when token is provided and user clicks load
+  useEffect(() => {
+    if (!mapContainer.current || !mapboxToken || !shouldLoadMap) return;
 
     mapboxgl.accessToken = mapboxToken;
     
@@ -52,7 +54,7 @@ export const DataCenterMap = () => {
       toast.error('Failed to initialize map. Please check your Mapbox token.');
       console.error(error);
     }
-  };
+  }, [mapboxToken, shouldLoadMap]);
 
   useEffect(() => {
     if (isMapReady && map.current) {
@@ -97,7 +99,7 @@ export const DataCenterMap = () => {
     }
   }, [isMapReady]);
 
-  if (!mapboxToken) {
+  if (!shouldLoadMap) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-4">
         <div className="w-full max-w-md space-y-4">
@@ -116,7 +118,13 @@ export const DataCenterMap = () => {
               className="bg-card border-border"
             />
             <Button 
-              onClick={initializeMap} 
+              onClick={() => {
+                if (mapboxToken) {
+                  setShouldLoadMap(true);
+                } else {
+                  toast.error('Please enter a valid Mapbox token');
+                }
+              }} 
               className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
             >
               Load Map
