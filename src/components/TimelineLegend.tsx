@@ -15,13 +15,13 @@ export const TimelineLegend = () => {
 
   // Generate organic shape path data for each metric layer
   const generateLayerPath = (metricIndex: number, yearIndex: number, totalYears: number) => {
-    const centerX = 200;
-    const yPosition = 20 + (yearIndex / totalYears) * 700;
-    const baseWidth = 80;
+    const centerX = 110;
+    const yPosition = 10 + (yearIndex / totalYears) * 520;
+    const baseWidth = 45;
     
     // Create variation based on metric and year for organic look
-    const variation = Math.sin(yearIndex * 0.3 + metricIndex) * 15 + Math.cos(yearIndex * 0.15) * 10;
-    const width = baseWidth + variation + (metricIndex * 8);
+    const variation = Math.sin(yearIndex * 0.3 + metricIndex) * 10 + Math.cos(yearIndex * 0.15) * 7;
+    const width = baseWidth + variation + (metricIndex * 5);
     
     return { x: centerX, y: yPosition, width };
   };
@@ -72,21 +72,21 @@ export const TimelineLegend = () => {
   };
 
   return (
-    <Card className="absolute top-4 left-4 bg-card/95 backdrop-blur-sm border-border p-6 shadow-xl z-10 max-h-[calc(100vh-2rem)] overflow-y-auto">
-      <div className="flex gap-8">
+    <div className="absolute top-4 left-4 bg-background/80 backdrop-blur-md border border-border/50 rounded-2xl p-3 shadow-2xl z-10 w-[320px] h-[580px]">
+      <div className="flex gap-2 h-full">
         {/* Timeline with years */}
-        <div className="flex flex-col items-end gap-0 text-xs text-muted-foreground">
+        <div className="flex flex-col items-end gap-0 text-[9px] text-muted-foreground/70">
           {years.map((year) => {
             const isHighlight = highlightYears.includes(year);
             return (
               <div
                 key={year}
-                className={`flex items-center gap-2 ${isHighlight ? 'font-bold text-foreground' : ''}`}
-                style={{ height: `${700 / years.length}px` }}
+                className={`flex items-center gap-1 ${isHighlight ? 'font-semibold text-foreground/80' : ''}`}
+                style={{ height: `${540 / years.length}px` }}
               >
-                <span className={isHighlight ? 'text-sm' : ''}>{year}</span>
+                <span className={isHighlight ? 'text-[10px]' : ''}>{year}</span>
                 <div 
-                  className={`w-2 h-px ${isHighlight ? 'bg-foreground' : 'bg-muted-foreground/30'}`}
+                  className={`w-1 h-px ${isHighlight ? 'bg-foreground/40' : 'bg-muted-foreground/20'}`}
                 />
               </div>
             );
@@ -94,17 +94,17 @@ export const TimelineLegend = () => {
         </div>
 
         {/* Central organic visualization */}
-        <div className="relative">
-          <svg width="400" height="740" className="overflow-visible">
+        <div className="relative flex-1">
+          <svg width="220" height="550" className="overflow-visible">
             {/* Dotted connecting line */}
             <line
-              x1="200"
-              y1="20"
-              x2="200"
-              y2="720"
-              stroke="rgba(150, 150, 150, 0.3)"
-              strokeWidth="1"
-              strokeDasharray="2,3"
+              x1="110"
+              y1="10"
+              x2="110"
+              y2="540"
+              stroke="rgba(150, 150, 150, 0.2)"
+              strokeWidth="0.5"
+              strokeDasharray="1,2"
             />
             
             {/* Organic layered shapes */}
@@ -113,26 +113,26 @@ export const TimelineLegend = () => {
         </div>
 
         {/* Legend with semi-circular indicators */}
-        <div className="flex flex-col justify-center gap-4">
-          <h3 className="text-sm font-semibold text-foreground mb-2 uppercase tracking-wide">
-            Total Metrics
+        <div className="flex flex-col justify-center gap-2.5 pr-1">
+          <h3 className="text-[8px] font-bold text-foreground/70 mb-1 uppercase tracking-wider">
+            Total
           </h3>
           {metrics.map((metric, index) => (
-            <div key={index} className="flex items-center gap-3">
-              <svg width="60" height="30" className="flex-shrink-0">
+            <div key={index} className="flex flex-col items-start gap-0.5">
+              <svg width="32" height="16" className="flex-shrink-0">
                 <path
-                  d={`M 0 30 Q 0 ${30 - index * 2}, 30 ${10 - index * 2} Q 60 ${30 - index * 2}, 60 30 Z`}
+                  d={`M 0 16 Q 0 ${16 - index * 1.5}, 16 ${6 - index * 1.5} Q 32 ${16 - index * 1.5}, 32 16 Z`}
                   fill={metric.color}
-                  opacity={0.8}
+                  opacity={0.85}
                 />
               </svg>
-              <span className="text-lg font-bold text-foreground tabular-nums">
+              <span className="text-[11px] font-bold text-foreground/90 tabular-nums">
                 {metric.value}
               </span>
             </div>
           ))}
         </div>
       </div>
-    </Card>
+    </div>
   );
 };
