@@ -8,6 +8,7 @@ import { Button } from './ui/button';
 import { toast } from 'sonner';
 import { createRoot } from 'react-dom/client';
 import { RadarOverlay } from './RadarOverlay';
+import { TimelineOverlay } from './TimelineOverlay';
 
 export const DataCenterMap = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -64,25 +65,41 @@ export const DataCenterMap = () => {
       // Add markers for each data center
       dataCenters.forEach((dc) => {
         const el = document.createElement('div');
-        el.style.width = '60px';
-        el.style.height = '60px';
+        el.style.width = '160px';
+        el.style.height = '200px';
         el.style.cursor = 'pointer';
         el.style.display = 'flex';
         el.style.alignItems = 'center';
         el.style.justifyContent = 'center';
+        el.style.gap = '8px';
 
         const root = createRoot(el);
-        root.render(<RadarOverlay dataCenter={dc} isHovered={false} />);
+        root.render(
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {dc.timeSeries && <TimelineOverlay timeSeries={dc.timeSeries} isHovered={false} />}
+            <RadarOverlay dataCenter={dc} isHovered={false} />
+          </div>
+        );
 
         el.addEventListener('mouseenter', (e) => {
           setHoveredDataCenter(dc);
           setMousePosition({ x: e.clientX, y: e.clientY });
-          root.render(<RadarOverlay dataCenter={dc} isHovered={true} />);
+          root.render(
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {dc.timeSeries && <TimelineOverlay timeSeries={dc.timeSeries} isHovered={true} />}
+              <RadarOverlay dataCenter={dc} isHovered={true} />
+            </div>
+          );
         });
 
         el.addEventListener('mouseleave', () => {
           setHoveredDataCenter(null);
-          root.render(<RadarOverlay dataCenter={dc} isHovered={false} />);
+          root.render(
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {dc.timeSeries && <TimelineOverlay timeSeries={dc.timeSeries} isHovered={false} />}
+              <RadarOverlay dataCenter={dc} isHovered={false} />
+            </div>
+          );
         });
 
         el.addEventListener('mousemove', (e) => {
