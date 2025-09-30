@@ -3,7 +3,6 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { dataCenters, DataCenter } from '@/data/dataCenters';
 import { DataCenterTooltip } from './DataCenterTooltip';
-import { MapLegend } from './MapLegend';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
@@ -149,7 +148,6 @@ export const DataCenterMap = () => {
   return (
     <div className="relative w-full h-screen bg-background">
       <div ref={mapContainer} className="absolute inset-0" />
-      <MapLegend />
       {hoveredDataCenter && (
         <DataCenterTooltip
           dataCenter={hoveredDataCenter}

@@ -23,8 +23,8 @@ export const RadarOverlay = ({ dataCenter, isHovered }: RadarOverlayProps) => {
 
   const centerX = 50;
   const centerY = 50;
-  const maxRadius = 35;
-  const size = isHovered ? 120 : 80;
+  const maxRadius = 40;
+  const size = isHovered ? 140 : 100;
 
   // Calculate points for the 4 axes (starting from top, going clockwise)
   const axes = [
@@ -67,8 +67,8 @@ export const RadarOverlay = ({ dataCenter, isHovered }: RadarOverlayProps) => {
   const pathData = createSmoothPath(dataPoints);
 
   const color = 'hsl(45 85% 75%)'; // Orange/tan color like reference
-  const gridColor = 'rgba(200, 200, 200, 0.3)';
-  const axisColor = 'rgba(200, 200, 200, 0.2)';
+  const gridColor = 'rgba(200, 200, 200, 0.5)';
+  const axisColor = 'rgba(200, 200, 200, 0.3)';
 
   return (
     <svg
@@ -86,9 +86,9 @@ export const RadarOverlay = ({ dataCenter, isHovered }: RadarOverlayProps) => {
           r={maxRadius * scale}
           fill="none"
           stroke={gridColor}
-          strokeWidth="0.5"
-          strokeDasharray="2,2"
-          opacity={isHovered ? 0.8 : 0.5}
+          strokeWidth="1"
+          strokeDasharray="3,2"
+          opacity={isHovered ? 0.9 : 0.7}
         />
       ))}
 
