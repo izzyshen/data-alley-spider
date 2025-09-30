@@ -40,14 +40,35 @@ export const RadarOverlay = ({ dataCenter, isHovered }: RadarOverlayProps) => {
     y: centerY + Math.sin(axis.angle) * maxRadius * axis.value,
   }));
 
-  const pathData = `M ${dataPoints[0].x} ${dataPoints[0].y} ${dataPoints
-    .slice(1)
-    .map((p) => `L ${p.x} ${p.y}`)
-    .join(" ")} Z`;
+  // Create smooth blob-like path using cardinal splines
+  const createSmoothPath = (points: { x: number; y: number }[]) => {
+    if (points.length < 2) return '';
+    
+    const tension = 0.3;
+    let path = `M ${points[0].x} ${points[0].y}`;
+    
+    for (let i = 0; i < points.length; i++) {
+      const p0 = points[(i - 1 + points.length) % points.length];
+      const p1 = points[i];
+      const p2 = points[(i + 1) % points.length];
+      const p3 = points[(i + 2) % points.length];
+      
+      const cp1x = p1.x + (p2.x - p0.x) * tension;
+      const cp1y = p1.y + (p2.y - p0.y) * tension;
+      const cp2x = p2.x - (p3.x - p1.x) * tension;
+      const cp2y = p2.y - (p3.y - p1.y) * tension;
+      
+      path += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
+    }
+    
+    return path + ' Z';
+  };
 
-  const color = dataCenter.type === 'high-consumption' ? 'hsl(6 78% 68%)' : 'hsl(217 91% 60%)';
-  const gridColor = 'rgba(255, 255, 255, 0.15)';
-  const axisColor = 'rgba(255, 255, 255, 0.1)';
+  const pathData = createSmoothPath(dataPoints);
+
+  const color = 'hsl(45 85% 75%)'; // Orange/tan color like reference
+  const gridColor = 'rgba(200, 200, 200, 0.3)';
+  const axisColor = 'rgba(200, 200, 200, 0.2)';
 
   return (
     <svg
@@ -86,15 +107,35 @@ export const RadarOverlay = ({ dataCenter, isHovered }: RadarOverlayProps) => {
         />
       ))}
 
-      {/* Data shape */}
+      {/* Data shape - smooth blob */}
       <path
         d={pathData}
         fill={color}
-        opacity={isHovered ? 0.7 : 0.5}
-        stroke={color}
-        strokeWidth="1.5"
+        opacity={isHovered ? 0.8 : 0.6}
+        stroke="hsl(30 70% 55%)"
+        strokeWidth="1"
         className="transition-all duration-300"
       />
+
+      {/* Axis labels (only show on hover) */}
+      {isHovered && axes.map((axis, i) => {
+        const labelDistance = maxRadius + 12;
+        const labelX = centerX + Math.cos(axis.angle) * labelDistance;
+        const labelY = centerY + Math.sin(axis.angle) * labelDistance;
+        
+        return (
+          <text
+            key={`label-${i}`}
+            x={labelX}
+            y={labelY}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            className="text-[6px] fill-white/80 font-medium"
+          >
+            {axis.label}
+          </text>
+        );
+      })}
 
       {/* Base center circle */}
       <circle
