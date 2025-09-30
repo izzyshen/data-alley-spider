@@ -7,21 +7,24 @@ export const TimelineLegend = () => {
   
   // Define 4 metrics with their colors
   const metrics = [
-    { name: 'Land Use', color: 'hsl(190, 50%, 60%)', value: 131 },
-    { name: 'Energy', color: 'hsl(240, 55%, 65%)', value: 82 },
-    { name: 'Water', color: 'hsl(280, 50%, 60%)', value: 76 },
-    { name: 'Noise', color: 'hsl(350, 60%, 65%)', value: 74 },
+    { name: 'Land Area', color: 'hsl(190, 50%, 60%)', value: 131 },
+    { name: 'Energy Consumption', color: 'hsl(240, 55%, 65%)', value: 82 },
+    { name: 'Water Consumption', color: 'hsl(280, 50%, 60%)', value: 76 },
+    { name: 'Noise Level', color: 'hsl(350, 60%, 65%)', value: 74 },
   ];
 
   // Generate organic shape path data for each metric layer
   const generateLayerPath = (metricIndex: number, yearIndex: number, totalYears: number) => {
     const centerX = 110;
     const yPosition = 10 + (yearIndex / totalYears) * 520;
-    const baseWidth = 45;
+    
+    // Growth factor: narrower at 1950 (yearIndex=0), wider at 2025 (yearIndex=75)
+    const growthFactor = 0.3 + (yearIndex / totalYears) * 0.7; // 0.3 to 1.0
+    const baseWidth = 25 * growthFactor;
     
     // Create variation based on metric and year for organic look
-    const variation = Math.sin(yearIndex * 0.3 + metricIndex) * 10 + Math.cos(yearIndex * 0.15) * 7;
-    const width = baseWidth + variation + (metricIndex * 5);
+    const variation = Math.sin(yearIndex * 0.3 + metricIndex) * 8 * growthFactor + Math.cos(yearIndex * 0.15) * 5 * growthFactor;
+    const width = baseWidth + variation + (metricIndex * 4 * growthFactor);
     
     return { x: centerX, y: yPosition, width };
   };
@@ -118,15 +121,20 @@ export const TimelineLegend = () => {
             Total
           </h3>
           {metrics.map((metric, index) => (
-            <div key={index} className="flex flex-col items-start gap-0.5">
-              <svg width="32" height="16" className="flex-shrink-0">
-                <path
-                  d={`M 0 16 Q 0 ${16 - index * 1.5}, 16 ${6 - index * 1.5} Q 32 ${16 - index * 1.5}, 32 16 Z`}
-                  fill={metric.color}
-                  opacity={0.85}
-                />
-              </svg>
-              <span className="text-[11px] font-bold text-foreground/90 tabular-nums">
+            <div key={index} className="flex flex-col items-start gap-1">
+              <div className="flex items-center gap-1.5">
+                <svg width="20" height="12" className="flex-shrink-0">
+                  <path
+                    d={`M 0 12 Q 0 ${12 - index * 1}, 10 ${4 - index * 1} Q 20 ${12 - index * 1}, 20 12 Z`}
+                    fill={metric.color}
+                    opacity={0.85}
+                  />
+                </svg>
+                <span className="text-[9px] text-foreground/80 leading-none">
+                  {metric.name}
+                </span>
+              </div>
+              <span className="text-[11px] font-bold text-foreground/90 tabular-nums pl-0.5">
                 {metric.value}
               </span>
             </div>
