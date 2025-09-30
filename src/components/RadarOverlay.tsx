@@ -21,64 +21,88 @@ export const RadarOverlay = ({ dataCenter, isHovered }: RadarOverlayProps) => {
     area: dataCenter.buildingArea / maxValues.buildingArea,
   };
 
-  // Create SVG path for the radar shape
-  const centerX = 30;
-  const centerY = 30;
-  const maxRadius = 25;
+  const centerX = 50;
+  const centerY = 50;
+  const maxRadius = 35;
+  const size = isHovered ? 120 : 80;
 
-  // Calculate points for the 4 axes (Energy, Water, Noise, Area)
-  const angle = (Math.PI * 2) / 4;
-  const points = [
-    {
-      x: centerX + Math.cos(-Math.PI / 2) * maxRadius * normalized.energy,
-      y: centerY + Math.sin(-Math.PI / 2) * maxRadius * normalized.energy,
-    },
-    {
-      x: centerX + Math.cos(-Math.PI / 2 + angle) * maxRadius * normalized.water,
-      y: centerY + Math.sin(-Math.PI / 2 + angle) * maxRadius * normalized.water,
-    },
-    {
-      x: centerX + Math.cos(-Math.PI / 2 + angle * 2) * maxRadius * normalized.noise,
-      y: centerY + Math.sin(-Math.PI / 2 + angle * 2) * maxRadius * normalized.noise,
-    },
-    {
-      x: centerX + Math.cos(-Math.PI / 2 + angle * 3) * maxRadius * normalized.area,
-      y: centerY + Math.sin(-Math.PI / 2 + angle * 3) * maxRadius * normalized.area,
-    },
+  // Calculate points for the 4 axes (starting from top, going clockwise)
+  const axes = [
+    { label: 'Energy', angle: -Math.PI / 2, value: normalized.energy },
+    { label: 'Area', angle: 0, value: normalized.area },
+    { label: 'Noise', angle: Math.PI / 2, value: normalized.noise },
+    { label: 'Water', angle: Math.PI, value: normalized.water },
   ];
 
-  const pathData = `M ${points[0].x} ${points[0].y} ${points
+  // Calculate data points
+  const dataPoints = axes.map((axis) => ({
+    x: centerX + Math.cos(axis.angle) * maxRadius * axis.value,
+    y: centerY + Math.sin(axis.angle) * maxRadius * axis.value,
+  }));
+
+  const pathData = `M ${dataPoints[0].x} ${dataPoints[0].y} ${dataPoints
     .slice(1)
     .map((p) => `L ${p.x} ${p.y}`)
     .join(" ")} Z`;
 
-  const baseCircleRadius = isHovered ? 8 : 6;
   const color = dataCenter.type === 'high-consumption' ? 'hsl(6 78% 68%)' : 'hsl(217 91% 60%)';
+  const gridColor = 'rgba(255, 255, 255, 0.15)';
+  const axisColor = 'rgba(255, 255, 255, 0.1)';
 
   return (
     <svg
-      width="60"
-      height="60"
-      className="pointer-events-none transition-transform duration-300"
-      style={{ transform: isHovered ? 'scale(1.2)' : 'scale(1)' }}
+      width={size}
+      height={size}
+      className="pointer-events-none transition-all duration-300"
+      viewBox="0 0 100 100"
     >
-      {/* Base circle (always visible) */}
-      <circle
-        cx={centerX}
-        cy={centerY}
-        r={baseCircleRadius}
-        fill={color}
-        opacity="0.6"
-        className="transition-all duration-300"
-      />
-      
-      {/* Radar shape (consumption data) */}
+      {/* Background grid circles (dashed) */}
+      {[0.25, 0.5, 0.75, 1].map((scale, i) => (
+        <circle
+          key={`grid-${i}`}
+          cx={centerX}
+          cy={centerY}
+          r={maxRadius * scale}
+          fill="none"
+          stroke={gridColor}
+          strokeWidth="0.5"
+          strokeDasharray="2,2"
+          opacity={isHovered ? 0.8 : 0.5}
+        />
+      ))}
+
+      {/* Axis lines */}
+      {axes.map((axis, i) => (
+        <line
+          key={`axis-${i}`}
+          x1={centerX}
+          y1={centerY}
+          x2={centerX + Math.cos(axis.angle) * maxRadius}
+          y2={centerY + Math.sin(axis.angle) * maxRadius}
+          stroke={axisColor}
+          strokeWidth="0.5"
+          strokeDasharray="1,1"
+          opacity={isHovered ? 0.8 : 0.5}
+        />
+      ))}
+
+      {/* Data shape */}
       <path
         d={pathData}
         fill={color}
-        opacity={isHovered ? "0.8" : "0.5"}
+        opacity={isHovered ? 0.7 : 0.5}
         stroke={color}
         strokeWidth="1.5"
+        className="transition-all duration-300"
+      />
+
+      {/* Base center circle */}
+      <circle
+        cx={centerX}
+        cy={centerY}
+        r={isHovered ? 3 : 2}
+        fill={color}
+        opacity="0.8"
         className="transition-all duration-300"
       />
       
@@ -86,7 +110,7 @@ export const RadarOverlay = ({ dataCenter, isHovered }: RadarOverlayProps) => {
       <circle
         cx={centerX}
         cy={centerY}
-        r="2"
+        r="1"
         fill="white"
         opacity="0.9"
       />
