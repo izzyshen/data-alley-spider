@@ -18,7 +18,11 @@ export const DataCenterMap = () => {
   const [isMapReady, setIsMapReady] = useState(false);
   const [hoveredDataCenter, setHoveredDataCenter] = useState<DataCenter | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [selectedYear, setSelectedYear] = useState(2025);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
+
+  // Filter data centers based on selected year
+  const filteredDataCenters = dataCenters.filter(dc => dc.yearOperational <= selectedYear);
 
   // Initialize map when token is provided and user clicks load
   useEffect(() => {
@@ -62,8 +66,8 @@ export const DataCenterMap = () => {
       markersRef.current.forEach(marker => marker.remove());
       markersRef.current = [];
 
-      // Add markers for each data center
-      dataCenters.forEach((dc) => {
+      // Add markers for each data center (filtered by year)
+      filteredDataCenters.forEach((dc) => {
         const el = document.createElement('div');
         el.style.width = '100px';
         el.style.height = '100px';
@@ -97,7 +101,7 @@ export const DataCenterMap = () => {
         markersRef.current.push(marker);
       });
     }
-  }, [isMapReady]);
+  }, [isMapReady, selectedYear, filteredDataCenters]);
 
   if (!shouldLoadMap) {
     return (
@@ -149,7 +153,7 @@ export const DataCenterMap = () => {
   return (
     <div className="relative w-full h-screen bg-background">
       <div ref={mapContainer} className="absolute inset-0" />
-      <TimelineLegend />
+      <TimelineLegend selectedYear={selectedYear} onYearChange={setSelectedYear} />
       {hoveredDataCenter && (
         <DataCenterTooltip
           dataCenter={hoveredDataCenter}

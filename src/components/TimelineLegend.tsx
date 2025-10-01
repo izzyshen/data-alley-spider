@@ -1,6 +1,15 @@
 import { dataCenters } from "@/data/dataCenters";
+import { useState, useRef, useEffect } from "react";
 
-export const TimelineLegend = () => {
+interface TimelineLegendProps {
+  selectedYear: number;
+  onYearChange: (year: number) => void;
+}
+
+export const TimelineLegend = ({ selectedYear, onYearChange }: TimelineLegendProps) => {
+  const [isDragging, setIsDragging] = useState(false);
+  const timelineRef = useRef<HTMLDivElement>(null);
+
   // Calculate cumulative metrics by year
   const minYear = 2001;
   const maxYear = 2025;
@@ -29,8 +38,8 @@ export const TimelineLegend = () => {
     noiseLevel: Math.max(...cumulativeData.map(d => d.noiseLevel)),
   };
   
-  // Current totals (2025)
-  const currentTotals = cumulativeData[cumulativeData.length - 1];
+  // Current totals for selected year
+  const currentTotals = cumulativeData.find(d => d.year === selectedYear) || cumulativeData[cumulativeData.length - 1];
   
   // Define 4 metrics with their colors
   const metrics = [
@@ -124,6 +133,50 @@ export const TimelineLegend = () => {
     return paths;
   };
 
+  // Handle slider drag
+  const handleSliderDrag = (clientY: number) => {
+    if (!timelineRef.current) return;
+    
+    const rect = timelineRef.current.getBoundingClientRect();
+    const relativeY = clientY - rect.top;
+    const percentage = Math.max(0, Math.min(1, relativeY / rect.height));
+    const yearIndex = Math.round(percentage * (years.length - 1));
+    const newYear = years[yearIndex];
+    
+    if (newYear !== selectedYear) {
+      onYearChange(newYear);
+    }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    handleSliderDrag(e.clientY);
+  };
+
+  // Add global event listeners for drag
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      handleSliderDrag(e.clientY);
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, selectedYear, years.length, minYear, maxYear, onYearChange]);
+
+  // Calculate slider position based on selected year
+  const sliderPosition = ((selectedYear - minYear) / (maxYear - minYear)) * 540;
+
   return (
     <div className="absolute top-4 left-4 bg-background/80 backdrop-blur-md border border-border/50 rounded-2xl p-3 shadow-2xl z-10 w-[320px] h-[580px]">
       <div className="flex gap-2 h-full">
@@ -147,7 +200,11 @@ export const TimelineLegend = () => {
         </div>
 
         {/* Central organic visualization */}
-        <div className="relative flex-1">
+        <div 
+          ref={timelineRef}
+          className="relative flex-1 cursor-pointer"
+          onMouseDown={handleMouseDown}
+        >
           <svg width="220" height="550" className="overflow-visible">
             {/* Dotted connecting line */}
             <line
@@ -162,6 +219,37 @@ export const TimelineLegend = () => {
             
             {/* Organic layered shapes */}
             {createCentralVisualization()}
+
+            {/* Draggable year slider */}
+            <g>
+              <line
+                x1="0"
+                y1={sliderPosition}
+                x2="220"
+                y2={sliderPosition}
+                stroke="hsl(var(--foreground))"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+              <circle
+                cx="110"
+                cy={sliderPosition}
+                r="8"
+                fill="hsl(var(--primary))"
+                stroke="hsl(var(--background))"
+                strokeWidth="2"
+                className="cursor-grab active:cursor-grabbing"
+              />
+              <text
+                x="115"
+                y={sliderPosition + 4}
+                fill="hsl(var(--foreground))"
+                fontSize="12"
+                fontWeight="bold"
+              >
+                {selectedYear}
+              </text>
+            </g>
           </svg>
         </div>
 
