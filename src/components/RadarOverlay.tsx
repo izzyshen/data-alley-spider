@@ -1,18 +1,20 @@
-import { DataCenter } from "@/data/dataCenters";
+import { DataCenter, dataCenters } from "@/data/dataCenters";
 
 interface RadarOverlayProps {
   dataCenter: DataCenter;
   isHovered: boolean;
 }
 
+// Calculate actual max values from the dataset
+const maxValues = {
+  energyConsumption: Math.max(...dataCenters.map(dc => dc.energyConsumption)),
+  waterConsumption: Math.max(...dataCenters.map(dc => dc.waterConsumption)),
+  noiseLevel: Math.max(...dataCenters.map(dc => dc.noiseLevel)),
+  buildingArea: Math.max(...dataCenters.map(dc => dc.buildingArea)),
+};
+
 export const RadarOverlay = ({ dataCenter, isHovered }: RadarOverlayProps) => {
   // Normalize values to 0-1 range for visualization
-  const maxValues = {
-    energyConsumption: 80,
-    waterConsumption: 1500000,
-    noiseLevel: 90,
-    buildingArea: 250000,
-  };
 
   const normalized = {
     energy: dataCenter.energyConsumption / maxValues.energyConsumption,
