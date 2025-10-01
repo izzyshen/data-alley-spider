@@ -9,7 +9,6 @@ interface RadarOverlayProps {
 const maxValues = {
   energyConsumption: Math.max(...dataCenters.map(dc => dc.energyConsumption)),
   waterConsumption: Math.max(...dataCenters.map(dc => dc.waterConsumption)),
-  noiseLevel: Math.max(...dataCenters.map(dc => dc.noiseLevel)),
   buildingArea: Math.max(...dataCenters.map(dc => dc.buildingArea)),
 };
 
@@ -19,7 +18,6 @@ export const RadarOverlay = ({ dataCenter, isHovered }: RadarOverlayProps) => {
   const normalized = {
     energy: dataCenter.energyConsumption / maxValues.energyConsumption,
     water: dataCenter.waterConsumption / maxValues.waterConsumption,
-    noise: dataCenter.noiseLevel / maxValues.noiseLevel,
     area: dataCenter.buildingArea / maxValues.buildingArea,
   };
 
@@ -28,12 +26,11 @@ export const RadarOverlay = ({ dataCenter, isHovered }: RadarOverlayProps) => {
   const maxRadius = 40;
   const size = isHovered ? 140 : 100;
 
-  // Calculate points for the 4 axes (starting from top, going clockwise)
+  // Calculate points for the 3 axes (triangle shape, evenly distributed)
   const axes = [
     { label: 'Energy', angle: -Math.PI / 2, value: normalized.energy },
-    { label: 'Area', angle: 0, value: normalized.area },
-    { label: 'Noise', angle: Math.PI / 2, value: normalized.noise },
-    { label: 'Water', angle: Math.PI, value: normalized.water },
+    { label: 'Water', angle: Math.PI / 6, value: normalized.water },
+    { label: 'Area', angle: (5 * Math.PI) / 6, value: normalized.area },
   ];
 
   // Calculate data points
