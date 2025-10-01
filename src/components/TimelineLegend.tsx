@@ -1,30 +1,80 @@
-import { Card } from "./ui/card";
+import { dataCenters } from "@/data/dataCenters";
 
 export const TimelineLegend = () => {
-  // Years from 1950 to 2025 with 5-year intervals highlighted
-  const years = Array.from({ length: 76 }, (_, i) => 1950 + i);
-  const highlightYears = [1950, 1955, 1960, 1965, 1970, 1975, 1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025];
+  // Calculate cumulative metrics by year
+  const minYear = 2001;
+  const maxYear = 2025;
+  const years = Array.from({ length: maxYear - minYear + 1 }, (_, i) => minYear + i);
+  const highlightYears = [2001, 2005, 2010, 2015, 2020, 2025];
+  
+  // Calculate cumulative totals for each year
+  const cumulativeData = years.map(year => {
+    const centersUpToYear = dataCenters.filter(dc => dc.yearOperational <= year);
+    return {
+      year,
+      buildingArea: centersUpToYear.reduce((sum, dc) => sum + dc.buildingArea, 0),
+      energyConsumption: centersUpToYear.reduce((sum, dc) => sum + dc.energyConsumption, 0),
+      waterConsumption: centersUpToYear.reduce((sum, dc) => sum + dc.waterConsumption, 0),
+      noiseLevel: centersUpToYear.length > 0 
+        ? centersUpToYear.reduce((sum, dc) => sum + dc.noiseLevel, 0) / centersUpToYear.length 
+        : 0,
+    };
+  });
+  
+  // Get max values for normalization
+  const maxValues = {
+    buildingArea: Math.max(...cumulativeData.map(d => d.buildingArea)),
+    energyConsumption: Math.max(...cumulativeData.map(d => d.energyConsumption)),
+    waterConsumption: Math.max(...cumulativeData.map(d => d.waterConsumption)),
+    noiseLevel: Math.max(...cumulativeData.map(d => d.noiseLevel)),
+  };
+  
+  // Current totals (2025)
+  const currentTotals = cumulativeData[cumulativeData.length - 1];
   
   // Define 4 metrics with their colors
   const metrics = [
-    { name: 'Land Area', color: 'hsl(190, 50%, 60%)', value: 131 },
-    { name: 'Energy Consumption', color: 'hsl(240, 55%, 65%)', value: 82 },
-    { name: 'Water Consumption', color: 'hsl(280, 50%, 60%)', value: 76 },
-    { name: 'Noise Level', color: 'hsl(350, 60%, 65%)', value: 74 },
+    { 
+      name: 'Building Area', 
+      color: 'hsl(190, 50%, 60%)', 
+      value: Math.round(currentTotals.buildingArea / 1000000).toString() + 'M sqft',
+      key: 'buildingArea' as const
+    },
+    { 
+      name: 'Energy', 
+      color: 'hsl(240, 55%, 65%)', 
+      value: Math.round(currentTotals.energyConsumption).toLocaleString() + ' MWh',
+      key: 'energyConsumption' as const
+    },
+    { 
+      name: 'Water', 
+      color: 'hsl(280, 50%, 60%)', 
+      value: Math.round(currentTotals.waterConsumption / 1000000).toString() + 'M L',
+      key: 'waterConsumption' as const
+    },
+    { 
+      name: 'Noise', 
+      color: 'hsl(350, 60%, 65%)', 
+      value: Math.round(currentTotals.noiseLevel) + ' dB',
+      key: 'noiseLevel' as const
+    },
   ];
 
-  // Generate organic shape path data for each metric layer
-  const generateLayerPath = (metricIndex: number, yearIndex: number, totalYears: number) => {
+  // Generate organic shape path data for each metric layer based on actual data
+  const generateLayerPath = (metricKey: string, yearIndex: number, totalYears: number) => {
     const centerX = 110;
     const yPosition = 10 + (yearIndex / totalYears) * 520;
     
-    // Growth factor: narrower at 1950 (yearIndex=0), wider at 2025 (yearIndex=75)
-    const growthFactor = 0.3 + (yearIndex / totalYears) * 0.7; // 0.3 to 1.0
-    const baseWidth = 25 * growthFactor;
+    // Get actual normalized value for this year and metric
+    const yearData = cumulativeData[yearIndex];
+    const normalizedValue = yearData[metricKey as keyof typeof yearData] / maxValues[metricKey as keyof typeof maxValues];
     
-    // Create variation based on metric and year for organic look
-    const variation = Math.sin(yearIndex * 0.3 + metricIndex) * 8 * growthFactor + Math.cos(yearIndex * 0.15) * 5 * growthFactor;
-    const width = baseWidth + variation + (metricIndex * 4 * growthFactor);
+    // Width based on actual cumulative data
+    const dataWidth = 5 + normalizedValue * 45; // 5 to 50 range
+    
+    // Add subtle organic variation
+    const variation = Math.sin(yearIndex * 0.2) * 3 + Math.cos(yearIndex * 0.1) * 2;
+    const width = dataWidth + variation;
     
     return { x: centerX, y: yPosition, width };
   };
@@ -35,7 +85,7 @@ export const TimelineLegend = () => {
     
     metrics.forEach((metric, metricIndex) => {
       const points = years.map((_, yearIndex) => 
-        generateLayerPath(metricIndex, yearIndex, years.length)
+        generateLayerPath(metric.key, yearIndex, years.length)
       );
       
       // Create left side path
