@@ -30,10 +30,6 @@ export const DataCenterTooltip = ({ dataCenter, position }: DataCenterTooltipPro
           <span className="font-semibold text-primary">{dataCenter.waterConsumption.toLocaleString()} L</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-muted-foreground">Noise Level:</span>
-          <span className="font-semibold text-primary">{dataCenter.noiseLevel} dB</span>
-        </div>
-        <div className="flex justify-between items-center">
           <span className="text-muted-foreground">Building Area:</span>
           <span className="font-semibold text-primary">{dataCenter.buildingArea.toLocaleString()} sqft</span>
         </div>
