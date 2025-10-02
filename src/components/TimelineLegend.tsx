@@ -69,68 +69,70 @@ export const TimelineLegend = ({ selectedYear, onYearChange }: TimelineLegendPro
     },
   ];
 
-  // Generate organic shape path data for each metric layer based on actual data
-  const generateLayerPath = (metricKey: string, yearIndex: number, totalYears: number) => {
+  // Create stacked bar visualization for each year
+  const createStackedVisualization = () => {
+    const elements: JSX.Element[] = [];
     const centerX = 110;
-    const yPosition = 10 + (yearIndex / totalYears) * 520;
+    const barHeight = 540 / years.length;
     
-    // Get actual normalized value for this year and metric
-    const yearData = cumulativeData[yearIndex];
-    const normalizedValue = yearData[metricKey as keyof typeof yearData] / maxValues[metricKey as keyof typeof maxValues];
-    
-    // Width based on actual cumulative data - increased scale for better visibility
-    const dataWidth = 10 + normalizedValue * 80; // 10 to 90 range for better separation
-    
-    // Add subtle organic variation
-    const variation = Math.sin(yearIndex * 0.2) * 4 + Math.cos(yearIndex * 0.1) * 3;
-    const width = dataWidth + variation;
-    
-    return { x: centerX, y: yPosition, width };
-  };
-
-  // Create smooth blob shapes for the central visualization
-  const createCentralVisualization = () => {
-    const paths: JSX.Element[] = [];
-    
-    metrics.forEach((metric, metricIndex) => {
-      const points = years.map((_, yearIndex) => 
-        generateLayerPath(metric.key, yearIndex, years.length)
-      );
+    years.forEach((year, yearIndex) => {
+      const yPosition = 10 + yearIndex * barHeight;
+      const yearData = cumulativeData[yearIndex];
       
-      // Create left side path
-      let leftPath = `M ${points[0].x - points[0].width / 2} ${points[0].y}`;
-      for (let i = 1; i < points.length; i++) {
-        const curr = points[i];
-        const prev = points[i - 1];
-        const cpx = prev.x - prev.width / 2;
-        const cpy = (prev.y + curr.y) / 2;
-        leftPath += ` Q ${cpx} ${cpy}, ${curr.x - curr.width / 2} ${curr.y}`;
-      }
+      // Calculate normalized heights for stacking (0-1 range)
+      const normalizedHeights = metrics.map(metric => {
+        const value = yearData[metric.key as keyof typeof yearData];
+        const maxValue = maxValues[metric.key as keyof typeof maxValues];
+        return value / maxValue;
+      });
       
-      // Create right side path (reverse)
-      for (let i = points.length - 1; i >= 0; i--) {
-        const curr = points[i];
-        const next = i < points.length - 1 ? points[i + 1] : points[i];
-        const cpx = curr.x + curr.width / 2;
-        const cpy = i < points.length - 1 ? (curr.y + next.y) / 2 : curr.y;
-        leftPath += ` Q ${cpx} ${cpy}, ${curr.x + curr.width / 2} ${curr.y}`;
-      }
+      // Scale factor to make the bars fit nicely in the available width
+      const totalNormalized = normalizedHeights.reduce((sum, h) => sum + h, 0);
+      const scaleFactor = totalNormalized > 0 ? 80 / totalNormalized : 0;
       
-      leftPath += ' Z';
+      // Create stacked rectangles from left to right
+      let currentX = centerX;
       
-      paths.push(
-        <path
-          key={`metric-${metricIndex}`}
-          d={leftPath}
-          fill={metric.color}
-          opacity={0.7}
-          stroke="rgba(255,255,255,0.1)"
-          strokeWidth="0.5"
-        />
-      );
+      metrics.forEach((metric, metricIndex) => {
+        const width = normalizedHeights[metricIndex] * scaleFactor;
+        
+        if (width > 0) {
+          // Left side (going left from center)
+          elements.push(
+            <rect
+              key={`bar-left-${yearIndex}-${metricIndex}`}
+              x={currentX - width}
+              y={yPosition}
+              width={width}
+              height={barHeight - 1}
+              fill={metric.color}
+              opacity={0.85}
+              stroke="rgba(255,255,255,0.2)"
+              strokeWidth="0.5"
+            />
+          );
+          
+          // Right side (mirrored)
+          elements.push(
+            <rect
+              key={`bar-right-${yearIndex}-${metricIndex}`}
+              x={centerX}
+              y={yPosition}
+              width={width}
+              height={barHeight - 1}
+              fill={metric.color}
+              opacity={0.85}
+              stroke="rgba(255,255,255,0.2)"
+              strokeWidth="0.5"
+            />
+          );
+        }
+        
+        currentX -= width;
+      });
     });
     
-    return paths;
+    return elements;
   };
 
   // Handle slider drag
@@ -206,19 +208,18 @@ export const TimelineLegend = ({ selectedYear, onYearChange }: TimelineLegendPro
           onMouseDown={handleMouseDown}
         >
           <svg width="220" height="550" className="overflow-visible">
-            {/* Dotted connecting line */}
+            {/* Center line */}
             <line
               x1="110"
               y1="10"
               x2="110"
-              y2="540"
-              stroke="rgba(150, 150, 150, 0.2)"
-              strokeWidth="0.5"
-              strokeDasharray="1,2"
+              y2="550"
+              stroke="rgba(150, 150, 150, 0.3)"
+              strokeWidth="1"
             />
             
-            {/* Organic layered shapes */}
-            {createCentralVisualization()}
+            {/* Stacked bar visualization */}
+            {createStackedVisualization()}
 
             {/* Draggable year slider */}
             <g>
