@@ -3,6 +3,7 @@ import { DataCenter, dataCenters } from "@/data/dataCenters";
 interface RadarOverlayProps {
   dataCenter: DataCenter;
   isHovered: boolean;
+  color?: string;
 }
 
 // Calculate actual max values from the dataset
@@ -12,7 +13,7 @@ const maxValues = {
   buildingArea: Math.max(...dataCenters.map(dc => dc.buildingArea)),
 };
 
-export const RadarOverlay = ({ dataCenter, isHovered }: RadarOverlayProps) => {
+export const RadarOverlay = ({ dataCenter, isHovered, color = 'hsl(45 85% 75%)' }: RadarOverlayProps) => {
   // Normalize values to 0-1 range for visualization
 
   const normalized = {
@@ -65,7 +66,6 @@ export const RadarOverlay = ({ dataCenter, isHovered }: RadarOverlayProps) => {
 
   const pathData = createSmoothPath(dataPoints);
 
-  const color = 'hsl(45 85% 75%)'; // Orange/tan color like reference
   const gridColor = 'rgba(200, 200, 200, 0.5)';
   const axisColor = 'rgba(200, 200, 200, 0.3)';
 

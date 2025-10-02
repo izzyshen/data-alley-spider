@@ -78,11 +78,11 @@ export const TimelineLegend = ({ selectedYear, onYearChange }: TimelineLegendPro
     const yearData = cumulativeData[yearIndex];
     const normalizedValue = yearData[metricKey as keyof typeof yearData] / maxValues[metricKey as keyof typeof maxValues];
     
-    // Width based on actual cumulative data
-    const dataWidth = 5 + normalizedValue * 45; // 5 to 50 range
+    // Width based on actual cumulative data - increased scale for better visibility
+    const dataWidth = 10 + normalizedValue * 80; // 10 to 90 range for better separation
     
     // Add subtle organic variation
-    const variation = Math.sin(yearIndex * 0.2) * 3 + Math.cos(yearIndex * 0.1) * 2;
+    const variation = Math.sin(yearIndex * 0.2) * 4 + Math.cos(yearIndex * 0.1) * 3;
     const width = dataWidth + variation;
     
     return { x: centerX, y: yPosition, width };

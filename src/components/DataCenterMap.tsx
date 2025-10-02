@@ -24,6 +24,20 @@ export const DataCenterMap = () => {
   // Filter data centers based on selected year
   const filteredDataCenters = dataCenters.filter(dc => dc.yearOperational <= selectedYear);
 
+  // Get color based on 5-year intervals
+  const getColorForYear = (year: number): string => {
+    const baseYear = Math.floor((year - 2001) / 5) * 5 + 2001;
+    const colors = [
+      'hsl(210 80% 60%)',  // 2001-2005: Blue
+      'hsl(30 85% 65%)',   // 2006-2010: Orange
+      'hsl(280 70% 65%)',  // 2011-2015: Purple
+      'hsl(160 75% 55%)',  // 2016-2020: Teal
+      'hsl(350 75% 65%)',  // 2021-2025: Red
+    ];
+    const index = Math.floor((year - 2001) / 5) % colors.length;
+    return colors[index];
+  };
+
   // Initialize map when token is provided and user clicks load
   useEffect(() => {
     if (!mapContainer.current || !mapboxToken || !shouldLoadMap) return;
@@ -75,19 +89,21 @@ export const DataCenterMap = () => {
         el.style.display = 'flex';
         el.style.alignItems = 'center';
         el.style.justifyContent = 'center';
+        el.style.pointerEvents = 'auto';
 
+        const dcColor = getColorForYear(dc.yearOperational);
         const root = createRoot(el);
-        root.render(<RadarOverlay dataCenter={dc} isHovered={false} />);
+        root.render(<RadarOverlay dataCenter={dc} isHovered={false} color={dcColor} />);
 
         el.addEventListener('mouseenter', (e) => {
           setHoveredDataCenter(dc);
           setMousePosition({ x: e.clientX, y: e.clientY });
-          root.render(<RadarOverlay dataCenter={dc} isHovered={true} />);
+          root.render(<RadarOverlay dataCenter={dc} isHovered={true} color={dcColor} />);
         });
 
         el.addEventListener('mouseleave', () => {
           setHoveredDataCenter(null);
-          root.render(<RadarOverlay dataCenter={dc} isHovered={false} />);
+          root.render(<RadarOverlay dataCenter={dc} isHovered={false} color={dcColor} />);
         });
 
         el.addEventListener('mousemove', (e) => {
@@ -151,7 +167,10 @@ export const DataCenterMap = () => {
   }
 
   return (
-    <div className="relative w-full h-screen bg-background">
+    <div 
+      className="relative w-full h-screen bg-background"
+      onMouseLeave={() => setHoveredDataCenter(null)}
+    >
       <div ref={mapContainer} className="absolute inset-0" />
       <TimelineLegend selectedYear={selectedYear} onYearChange={setSelectedYear} />
       {hoveredDataCenter && (

@@ -18,6 +18,10 @@ export const DataCenterTooltip = ({ dataCenter, position }: DataCenterTooltipPro
       <h3 className="font-bold text-lg text-foreground mb-3">{dataCenter.name}</h3>
       <div className="space-y-2 text-sm">
         <div className="flex justify-between items-center">
+          <span className="text-muted-foreground">Year Operational:</span>
+          <span className="font-semibold text-primary">{dataCenter.yearOperational}</span>
+        </div>
+        <div className="flex justify-between items-center">
           <span className="text-muted-foreground">Energy Consumption:</span>
           <span className="font-semibold text-primary">{dataCenter.energyConsumption} MWh</span>
         </div>
