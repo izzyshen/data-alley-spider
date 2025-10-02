@@ -40,31 +40,34 @@ export const RadarOverlay = ({ dataCenter, isHovered, color = 'hsl(45 85% 75%)' 
     y: centerY + Math.sin(axis.angle) * maxRadius * axis.value,
   }));
 
-  // Create smooth blob-like path using cardinal splines
-  const createSmoothPath = (points: { x: number; y: number }[]) => {
+  // Create sharp 3-point star shape with concave curves between points
+  const createStarPath = (points: { x: number; y: number }[]) => {
     if (points.length < 2) return '';
     
-    const tension = 0.3;
     let path = `M ${points[0].x} ${points[0].y}`;
     
+    // Create sharp star by adding intermediate control points between main points
     for (let i = 0; i < points.length; i++) {
-      const p0 = points[(i - 1 + points.length) % points.length];
-      const p1 = points[i];
-      const p2 = points[(i + 1) % points.length];
-      const p3 = points[(i + 2) % points.length];
+      const current = points[i];
+      const next = points[(i + 1) % points.length];
       
-      const cp1x = p1.x + (p2.x - p0.x) * tension;
-      const cp1y = p1.y + (p2.y - p0.y) * tension;
-      const cp2x = p2.x - (p3.x - p1.x) * tension;
-      const cp2y = p2.y - (p3.y - p1.y) * tension;
+      // Calculate midpoint between current and next point
+      const midX = (current.x + next.x) / 2;
+      const midY = (current.y + next.y) / 2;
       
-      path += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
+      // Pull the midpoint toward center to create concave curve (star effect)
+      const pullFactor = 0.4; // How much to pull toward center (higher = more concave)
+      const controlX = midX + (centerX - midX) * pullFactor;
+      const controlY = midY + (centerY - midY) * pullFactor;
+      
+      // Create quadratic curve from current point through control to next point
+      path += ` Q ${controlX} ${controlY}, ${next.x} ${next.y}`;
     }
     
     return path + ' Z';
   };
 
-  const pathData = createSmoothPath(dataPoints);
+  const pathData = createStarPath(dataPoints);
 
   const gridColor = 'rgba(200, 200, 200, 0.5)';
   const axisColor = 'rgba(200, 200, 200, 0.3)';
