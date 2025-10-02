@@ -24,6 +24,9 @@ export const TimelineLegend = ({ selectedYear, onYearChange }: TimelineLegendPro
       buildingArea: centersUpToYear.reduce((sum, dc) => sum + dc.buildingArea, 0),
       energyConsumption: centersUpToYear.reduce((sum, dc) => sum + dc.energyConsumption, 0),
       waterConsumption: centersUpToYear.reduce((sum, dc) => sum + dc.waterConsumption, 0),
+      noiseLevel: centersUpToYear.length > 0 
+        ? centersUpToYear.reduce((sum, dc) => sum + dc.noiseLevel, 0) / centersUpToYear.length 
+        : 0,
     };
   });
   
@@ -32,12 +35,13 @@ export const TimelineLegend = ({ selectedYear, onYearChange }: TimelineLegendPro
     buildingArea: Math.max(...cumulativeData.map(d => d.buildingArea)),
     energyConsumption: Math.max(...cumulativeData.map(d => d.energyConsumption)),
     waterConsumption: Math.max(...cumulativeData.map(d => d.waterConsumption)),
+    noiseLevel: Math.max(...cumulativeData.map(d => d.noiseLevel)),
   };
   
   // Current totals for selected year
   const currentTotals = cumulativeData.find(d => d.year === selectedYear) || cumulativeData[cumulativeData.length - 1];
   
-  // Define 3 metrics with their colors
+  // Define 4 metrics with their colors
   const metrics = [
     { 
       name: 'Building Area', 
@@ -56,6 +60,12 @@ export const TimelineLegend = ({ selectedYear, onYearChange }: TimelineLegendPro
       color: 'hsl(280, 50%, 60%)', 
       value: Math.round(currentTotals.waterConsumption / 1000000).toString() + 'M L',
       key: 'waterConsumption' as const
+    },
+    { 
+      name: 'Noise', 
+      color: 'hsl(350, 60%, 65%)', 
+      value: Math.round(currentTotals.noiseLevel) + ' dB',
+      key: 'noiseLevel' as const
     },
   ];
 
