@@ -105,17 +105,17 @@ export const AreaChart = ({ data, selectedYear, type }: AreaChartProps) => {
             </text>
           ))}
 
-          {/* DC area (blue) */}
+          {/* DC area (grey-blue) */}
           <path
             d={dcPath}
-            fill="hsl(210 80% 60%)"
+            fill="hsl(230 20% 61%)"
             opacity={0.7}
           />
 
-          {/* People area (red) */}
+          {/* People area (pink) */}
           <path
             d={peoplePath}
-            fill="hsl(350 75% 65%)"
+            fill="hsl(347 100% 93%)"
             opacity={0.7}
           />
 
@@ -163,7 +163,7 @@ export const AreaChart = ({ data, selectedYear, type }: AreaChartProps) => {
           className="flex items-center justify-center text-xs font-semibold text-white"
           style={{ 
             width: `${peoplePercent}%`,
-            backgroundColor: 'hsl(350 75% 65%)'
+            backgroundColor: 'hsl(347 100% 93%)'
           }}
         >
           {peoplePercent > 15 && `${peoplePercent.toFixed(0)}%`}
@@ -172,7 +172,7 @@ export const AreaChart = ({ data, selectedYear, type }: AreaChartProps) => {
           className="flex items-center justify-center text-xs font-semibold text-white"
           style={{ 
             width: `${dcPercent}%`,
-            backgroundColor: 'hsl(210 80% 60%)'
+            backgroundColor: 'hsl(230 20% 61%)'
           }}
         >
           {dcPercent > 15 && `${dcPercent.toFixed(0)}%`}
@@ -182,11 +182,11 @@ export const AreaChart = ({ data, selectedYear, type }: AreaChartProps) => {
       {/* Legend */}
       <div className="flex gap-4 justify-center text-xs">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'hsl(210 80% 60%)' }} />
+          <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'hsl(230 20% 61%)' }} />
           <span className="text-foreground/70">{type === 'energy' ? 'MWh/yr (DC)' : 'Gallons/yr (DC)'}</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'hsl(350 75% 65%)' }} />
+          <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'hsl(347 100% 93%)' }} />
           <span className="text-foreground/70">{type === 'energy' ? 'MWh/yr (people)' : 'Gallons/yr (people)'}</span>
         </div>
       </div>
