@@ -15,11 +15,12 @@ export const parseEnergyData = (csvText: string): ConsumptionData[] => {
     const line = lines[i].trim();
     if (!line) continue;
     
-    const parts = line.split(',');
+    const parts = line.split(',').map(p => p.replace(/"/g, ''));
     if (parts.length >= 7) {
       const year = parseInt(parts[0]);
-      const mwhPeople = parseFloat(parts[4].replace(/"/g, ''));
-      const mwhDC = parseFloat(parts[6].replace(/"/g, ''));
+      // Column 4 is MWh/yr (people), column 6 is MWh/yr (DC)
+      const mwhPeople = parseFloat(parts[4].replace(/,/g, ''));
+      const mwhDC = parseFloat(parts[6].replace(/,/g, ''));
       
       if (!isNaN(year) && !isNaN(mwhPeople) && !isNaN(mwhDC)) {
         result.push({
@@ -45,11 +46,11 @@ export const parseWaterData = (csvText: string): ConsumptionData[] => {
     const line = lines[i].trim();
     if (!line) continue;
     
-    const parts = line.split(',');
+    const parts = line.split(',').map(p => p.replace(/"/g, ''));
     if (parts.length >= 3) {
       const year = parseInt(parts[0]);
-      const gallonsPeople = parseFloat(parts[2].replace(/"/g, ''));
-      const gallonsDC = parseFloat(parts[3].replace(/"/g, ''));
+      const gallonsPeople = parseFloat(parts[2].replace(/,/g, ''));
+      const gallonsDC = parseFloat(parts[3].replace(/,/g, ''));
       
       if (!isNaN(year) && !isNaN(gallonsPeople) && !isNaN(gallonsDC)) {
         result.push({
