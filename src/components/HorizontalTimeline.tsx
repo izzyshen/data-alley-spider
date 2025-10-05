@@ -27,6 +27,12 @@ export const HorizontalTimeline = ({ selectedYear, onYearChange }: HorizontalTim
     return colors[index];
   };
 
+  // Get segment color for the timeline line
+  const getSegmentColor = (position: number): string => {
+    const yearAtPosition = minYear + (position / 100) * (maxYear - minYear);
+    return getColorForYear(yearAtPosition);
+  };
+
   const handleSliderDrag = (clientX: number) => {
     if (!timelineRef.current) return;
     
@@ -69,39 +75,48 @@ export const HorizontalTimeline = ({ selectedYear, onYearChange }: HorizontalTim
   const sliderPosition = ((selectedYear - minYear) / (maxYear - minYear)) * 100;
 
   return (
-    <div className="absolute top-6 left-1/2 -translate-x-1/2 w-[90%] max-w-5xl z-10">
+    <div className="absolute top-6 left-1/2 -translate-x-1/2 w-[80%] max-w-4xl z-10">
       <div 
         ref={timelineRef}
-        className="relative h-16 cursor-pointer"
+        className="relative h-20 cursor-pointer"
         onMouseDown={handleMouseDown}
       >
-        {/* Timeline line */}
-        <div className="absolute top-8 left-0 right-0 h-0.5 bg-foreground/30" />
+        {/* Colored timeline segments */}
+        <svg className="absolute top-10 left-0 w-full h-1" style={{ overflow: 'visible' }}>
+          <defs>
+            <linearGradient id="timelineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              {years.map((year, i) => {
+                const position = (i / (years.length - 1)) * 100;
+                const color = getColorForYear(year);
+                return <stop key={year} offset={`${position}%`} stopColor={color} />;
+              })}
+            </linearGradient>
+          </defs>
+          <rect x="0" y="0" width="100%" height="3" fill="url(#timelineGradient)" />
+        </svg>
         
-        {/* Year markers */}
-        {highlightYears.map((year) => {
+        {/* All year tick marks */}
+        {years.map((year) => {
           const position = ((year - minYear) / (maxYear - minYear)) * 100;
-          const color = getColorForYear(year);
+          const isHighlight = highlightYears.includes(year);
           
           return (
             <div
               key={year}
               className="absolute"
-              style={{ left: `${position}%`, top: '0' }}
+              style={{ left: `${position}%`, top: '40px' }}
             >
-              <div 
-                className="flex flex-col items-center -translate-x-1/2"
-              >
+              <div className="flex flex-col items-center -translate-x-1/2">
+                {/* Tick mark */}
                 <div 
-                  className="w-4 h-4 rounded-full border-2 border-background mb-2"
-                  style={{ backgroundColor: color }}
+                  className={`bg-white ${isHighlight ? 'w-0.5 h-6' : 'w-px h-3'}`}
                 />
-                <span 
-                  className="text-sm font-semibold"
-                  style={{ color }}
-                >
-                  {year}
-                </span>
+                {/* Year label only for highlight years */}
+                {isHighlight && (
+                  <span className="text-sm font-medium text-white mt-1">
+                    {year}
+                  </span>
+                )}
               </div>
             </div>
           );
@@ -109,12 +124,12 @@ export const HorizontalTimeline = ({ selectedYear, onYearChange }: HorizontalTim
         
         {/* Current year indicator */}
         <div
-          className="absolute top-6 -translate-x-1/2 transition-all duration-150"
+          className="absolute top-8 -translate-x-1/2 transition-all duration-150"
           style={{ left: `${sliderPosition}%` }}
         >
           <div className="flex flex-col items-center">
-            <div className="w-6 h-6 rounded-full bg-primary border-4 border-background shadow-lg cursor-grab active:cursor-grabbing" />
-            <div className="mt-2 px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm font-bold shadow-lg">
+            <div className="w-5 h-5 rounded-full bg-white border-2 border-background shadow-lg cursor-grab active:cursor-grabbing" />
+            <div className="mt-2 px-2.5 py-0.5 bg-white text-background rounded-full text-xs font-bold shadow-lg">
               {selectedYear}
             </div>
           </div>

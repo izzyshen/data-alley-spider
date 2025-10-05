@@ -191,7 +191,7 @@ export const DataCenterMap = () => {
       <HorizontalTimeline selectedYear={selectedYear} onYearChange={setSelectedYear} />
       
       {/* Area charts at bottom */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-6 bg-background/90 backdrop-blur-md border border-border/50 rounded-2xl p-6 shadow-2xl">
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-6 bg-background/90 backdrop-blur-md border border-border/50 rounded-2xl p-5 shadow-2xl">
         <AreaChart data={energyData} selectedYear={selectedYear} type="energy" />
         <div className="w-px bg-border/50" />
         <AreaChart data={waterData} selectedYear={selectedYear} type="water" />

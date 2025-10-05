@@ -21,9 +21,9 @@ export const AreaChart = ({ data, selectedYear, type }: AreaChartProps) => {
   const dcKey = type === 'energy' ? 'mwhDC' : 'gallonsDC';
   const peopleKey = type === 'energy' ? 'mwhPeople' : 'gallonsPeople';
   
-  // Use max value from ALL data (not just filtered) to keep y-axis constant
+  // Use max value from filtered data for dynamic y-axis scaling
   const maxValue = Math.max(
-    ...data.map(d => d[dcKey] + d[peopleKey])
+    ...filteredData.map(d => d[dcKey] + d[peopleKey])
   );
 
   const xScale = (year: number) => {
@@ -158,7 +158,7 @@ export const AreaChart = ({ data, selectedYear, type }: AreaChartProps) => {
       </svg>
       
       {/* Percentage bar */}
-      <div className="flex h-8 rounded overflow-hidden">
+      <div className="flex h-4 rounded overflow-hidden">
         <div 
           className="flex items-center justify-center text-xs font-semibold text-white"
           style={{ 
