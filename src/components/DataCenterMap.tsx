@@ -38,15 +38,15 @@ export const DataCenterMap = () => {
   // Filter data centers based on selected year
   const filteredDataCenters = dataCenters.filter(dc => dc.yearOperational <= selectedYear);
 
-  // Get color based on 5-year intervals
+  // Get color based on 5-year intervals (pink to yellow gradient)
   const getColorForYear = (year: number): string => {
     const baseYear = Math.floor((year - 2001) / 5) * 5 + 2001;
     const colors = [
-      'hsl(210 80% 60%)',  // 2001-2005: Blue
-      'hsl(30 85% 65%)',   // 2006-2010: Orange
-      'hsl(280 70% 65%)',  // 2011-2015: Purple
-      'hsl(160 75% 55%)',  // 2016-2020: Teal
-      'hsl(350 75% 65%)',  // 2021-2025: Red
+      'hsl(358 95% 85%)',  // 2001-2005: Dark pink
+      'hsl(0 85% 93%)',    // 2006-2010: Light pink
+      'hsl(40 40% 92%)',   // 2011-2015: Very light beige
+      'hsl(46 100% 82%)',  // 2016-2020: Light yellow
+      'hsl(48 97% 61%)',   // 2021-2025: Bright yellow
     ];
     const index = Math.floor((year - 2001) / 5) % colors.length;
     return colors[index];
