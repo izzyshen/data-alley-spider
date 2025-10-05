@@ -8,7 +8,7 @@ interface AreaChartProps {
 
 export const AreaChart = ({ data, selectedYear, type }: AreaChartProps) => {
   const width = 400;
-  const height = 180;
+  const height = 140;
   const padding = { top: 10, right: 20, bottom: 40, left: 60 };
   const chartWidth = width - padding.left - padding.right;
   const chartHeight = height - padding.top - padding.bottom;
@@ -21,8 +21,9 @@ export const AreaChart = ({ data, selectedYear, type }: AreaChartProps) => {
   const dcKey = type === 'energy' ? 'mwhDC' : 'gallonsDC';
   const peopleKey = type === 'energy' ? 'mwhPeople' : 'gallonsPeople';
   
+  // Use max value from ALL data (not just filtered) to keep y-axis constant
   const maxValue = Math.max(
-    ...filteredData.map(d => d[dcKey] + d[peopleKey])
+    ...data.map(d => d[dcKey] + d[peopleKey])
   );
 
   const xScale = (year: number) => {

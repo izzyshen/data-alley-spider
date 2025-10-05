@@ -10,8 +10,9 @@ import { createRoot } from 'react-dom/client';
 import { RadarOverlay } from './RadarOverlay';
 import { HorizontalTimeline } from './HorizontalTimeline';
 import { AreaChart } from './AreaChart';
-import { parseConsumptionData, ConsumptionData } from '@/data/virginiaDataCenters';
-import virginiaDataCSV from '@/data/virginiaDataCenters.csv?raw';
+import { parseEnergyData, parseWaterData, ConsumptionData } from '@/data/virginiaDataCenters';
+import energyDataCSV from '@/data/energyConsumption.csv?raw';
+import waterDataCSV from '@/data/waterConsumption.csv?raw';
 
 export const DataCenterMap = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -23,12 +24,15 @@ export const DataCenterMap = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [selectedYear, setSelectedYear] = useState(2025);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
-  const [consumptionData, setConsumptionData] = useState<ConsumptionData[]>([]);
+  const [energyData, setEnergyData] = useState<ConsumptionData[]>([]);
+  const [waterData, setWaterData] = useState<ConsumptionData[]>([]);
 
   // Parse CSV data on mount
   useEffect(() => {
-    const data = parseConsumptionData(virginiaDataCSV);
-    setConsumptionData(data);
+    const energy = parseEnergyData(energyDataCSV);
+    const water = parseWaterData(waterDataCSV);
+    setEnergyData(energy);
+    setWaterData(water);
   }, []);
 
   // Filter data centers based on selected year
@@ -188,9 +192,9 @@ export const DataCenterMap = () => {
       
       {/* Area charts at bottom */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-6 bg-background/90 backdrop-blur-md border border-border/50 rounded-2xl p-6 shadow-2xl">
-        <AreaChart data={consumptionData} selectedYear={selectedYear} type="energy" />
+        <AreaChart data={energyData} selectedYear={selectedYear} type="energy" />
         <div className="w-px bg-border/50" />
-        <AreaChart data={consumptionData} selectedYear={selectedYear} type="water" />
+        <AreaChart data={waterData} selectedYear={selectedYear} type="water" />
       </div>
       
       {hoveredDataCenter && (
