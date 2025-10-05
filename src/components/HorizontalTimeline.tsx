@@ -7,6 +7,7 @@ interface HorizontalTimelineProps {
 
 export const HorizontalTimeline = ({ selectedYear, onYearChange }: HorizontalTimelineProps) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [hoveredYear, setHoveredYear] = useState<number | null>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
 
   const minYear = 2001;
@@ -99,21 +100,24 @@ export const HorizontalTimeline = ({ selectedYear, onYearChange }: HorizontalTim
         {years.map((year) => {
           const position = ((year - minYear) / (maxYear - minYear)) * 100;
           const isHighlight = highlightYears.includes(year);
+          const showLabel = isHighlight || hoveredYear === year;
           
           return (
             <div
               key={year}
               className="absolute"
               style={{ left: `${position}%`, top: '40px' }}
+              onMouseEnter={() => setHoveredYear(year)}
+              onMouseLeave={() => setHoveredYear(null)}
             >
               <div className="flex flex-col items-center -translate-x-1/2">
-                {/* Tick mark */}
+                {/* Tick mark - shorter */}
                 <div 
-                  className={`bg-white ${isHighlight ? 'w-0.5 h-6' : 'w-px h-3'}`}
+                  className={`bg-white ${isHighlight ? 'w-0.5 h-3' : 'w-px h-2'}`}
                 />
-                {/* Year label only for highlight years */}
-                {isHighlight && (
-                  <span className="text-sm font-medium text-white mt-1">
+                {/* Year label - smaller text, shown on hover for non-highlight years */}
+                {showLabel && (
+                  <span className="text-xs font-medium text-white mt-1">
                     {year}
                   </span>
                 )}
@@ -129,7 +133,7 @@ export const HorizontalTimeline = ({ selectedYear, onYearChange }: HorizontalTim
         >
           <div className="flex flex-col items-center">
             <div className="w-5 h-5 rounded-full bg-white border-2 border-background shadow-lg cursor-grab active:cursor-grabbing" />
-            <div className="mt-2 px-2.5 py-0.5 bg-white text-background rounded-full text-xs font-bold shadow-lg">
+            <div className="mt-2 px-2 py-0.5 bg-white text-background rounded-full text-[10px] font-bold shadow-lg">
               {selectedYear}
             </div>
           </div>
