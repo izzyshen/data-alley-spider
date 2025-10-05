@@ -8,7 +8,10 @@ import { Button } from './ui/button';
 import { toast } from 'sonner';
 import { createRoot } from 'react-dom/client';
 import { RadarOverlay } from './RadarOverlay';
-import { TimelineLegend } from './TimelineLegend';
+import { HorizontalTimeline } from './HorizontalTimeline';
+import { AreaChart } from './AreaChart';
+import { parseConsumptionData, ConsumptionData } from '@/data/virginiaDataCenters';
+import virginiaDataCSV from '@/data/virginiaDataCenters.csv?raw';
 
 export const DataCenterMap = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -20,6 +23,13 @@ export const DataCenterMap = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [selectedYear, setSelectedYear] = useState(2025);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const [consumptionData, setConsumptionData] = useState<ConsumptionData[]>([]);
+
+  // Parse CSV data on mount
+  useEffect(() => {
+    const data = parseConsumptionData(virginiaDataCSV);
+    setConsumptionData(data);
+  }, []);
 
   // Filter data centers based on selected year
   const filteredDataCenters = dataCenters.filter(dc => dc.yearOperational <= selectedYear);
@@ -172,7 +182,17 @@ export const DataCenterMap = () => {
       onMouseLeave={() => setHoveredDataCenter(null)}
     >
       <div ref={mapContainer} className="absolute inset-0" />
-      <TimelineLegend selectedYear={selectedYear} onYearChange={setSelectedYear} />
+      
+      {/* Horizontal timeline at top */}
+      <HorizontalTimeline selectedYear={selectedYear} onYearChange={setSelectedYear} />
+      
+      {/* Area charts at bottom */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-6 bg-background/90 backdrop-blur-md border border-border/50 rounded-2xl p-6 shadow-2xl">
+        <AreaChart data={consumptionData} selectedYear={selectedYear} type="energy" />
+        <div className="w-px bg-border/50" />
+        <AreaChart data={consumptionData} selectedYear={selectedYear} type="water" />
+      </div>
+      
       {hoveredDataCenter && (
         <DataCenterTooltip
           dataCenter={hoveredDataCenter}
