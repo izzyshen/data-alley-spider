@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { dataCenters, DataCenter } from '@/data/dataCenters';
-import { DataCenterTooltip } from './DataCenterTooltip';
+import { dataCenters } from '@/data/dataCenters';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
@@ -20,8 +19,6 @@ export const DataCenterMap = () => {
   const [mapboxToken, setMapboxToken] = useState('');
   const [shouldLoadMap, setShouldLoadMap] = useState(false);
   const [isMapReady, setIsMapReady] = useState(false);
-  const [hoveredDataCenter, setHoveredDataCenter] = useState<DataCenter | null>(null);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [selectedYear, setSelectedYear] = useState(2025);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const [energyData, setEnergyData] = useState<ConsumptionData[]>([]);
@@ -109,21 +106,6 @@ export const DataCenterMap = () => {
         const root = createRoot(el);
         root.render(<RadarOverlay dataCenter={dc} isHovered={false} color={dcColor} />);
 
-        el.addEventListener('mouseenter', (e) => {
-          setHoveredDataCenter(dc);
-          setMousePosition({ x: e.clientX, y: e.clientY });
-          root.render(<RadarOverlay dataCenter={dc} isHovered={true} color={dcColor} />);
-        });
-
-        el.addEventListener('mouseleave', () => {
-          setHoveredDataCenter(null);
-          root.render(<RadarOverlay dataCenter={dc} isHovered={false} color={dcColor} />);
-        });
-
-        el.addEventListener('mousemove', (e) => {
-          setMousePosition({ x: e.clientX, y: e.clientY });
-        });
-
         const marker = new mapboxgl.Marker(el)
           .setLngLat([dc.lng, dc.lat])
           .addTo(map.current!);
@@ -181,10 +163,7 @@ export const DataCenterMap = () => {
   }
 
   return (
-    <div 
-      className="relative w-full h-screen bg-background"
-      onMouseLeave={() => setHoveredDataCenter(null)}
-    >
+    <div className="relative w-full h-screen bg-background">
       <div ref={mapContainer} className="absolute inset-0" />
       
       {/* Horizontal timeline at top */}
@@ -196,13 +175,6 @@ export const DataCenterMap = () => {
         <div className="w-px bg-border/50" />
         <AreaChart data={waterData} selectedYear={selectedYear} type="water" />
       </div>
-      
-      {hoveredDataCenter && (
-        <DataCenterTooltip
-          dataCenter={hoveredDataCenter}
-          position={mousePosition}
-        />
-      )}
     </div>
   );
 };
