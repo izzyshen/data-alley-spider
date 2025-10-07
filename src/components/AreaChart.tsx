@@ -4,9 +4,10 @@ interface AreaChartProps {
   data: ConsumptionData[];
   selectedYear: number;
   type: 'energy' | 'water';
+  onYearChange: (year: number) => void;
 }
 
-export const AreaChart = ({ data, selectedYear, type }: AreaChartProps) => {
+export const AreaChart = ({ data, selectedYear, type, onYearChange }: AreaChartProps) => {
   const width = 400;
   const height = 140;
   const padding = { top: 10, right: 20, bottom: 40, left: 60 };
@@ -72,6 +73,16 @@ export const AreaChart = ({ data, selectedYear, type }: AreaChartProps) => {
   };
 
   const yAxisTicks = [0, maxValue * 0.25, maxValue * 0.5, maxValue * 0.75, maxValue];
+
+  const handleChartClick = (e: React.MouseEvent<SVGRectElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const minYear = 2001;
+    const maxYear = 2025;
+    const year = Math.round(minYear + (x / chartWidth) * (maxYear - minYear));
+    const clampedYear = Math.max(minYear, Math.min(maxYear, year));
+    onYearChange(clampedYear);
+  };
 
   return (
     <div className="flex flex-col gap-2">
@@ -154,6 +165,33 @@ export const AreaChart = ({ data, selectedYear, type }: AreaChartProps) => {
           >
             {type === 'energy' ? 'MWh/yr' : 'Gallons/yr'}
           </text>
+
+          {/* Vertical indicator line for selected year */}
+          <line
+            x1={xScale(selectedYear)}
+            y1={0}
+            x2={xScale(selectedYear)}
+            y2={chartHeight}
+            stroke="white"
+            strokeWidth="2"
+            opacity={0.8}
+          />
+
+          {/* Interactive overlay for dragging */}
+          <rect
+            x={0}
+            y={0}
+            width={chartWidth}
+            height={chartHeight}
+            fill="transparent"
+            style={{ cursor: 'pointer' }}
+            onMouseDown={handleChartClick}
+            onMouseMove={(e) => {
+              if (e.buttons === 1) {
+                handleChartClick(e);
+              }
+            }}
+          />
         </g>
       </svg>
       
