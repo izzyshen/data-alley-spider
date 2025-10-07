@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { dataCenters, DataCenter } from '@/data/dataCenters';
@@ -7,7 +7,7 @@ import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
 import { createRoot } from 'react-dom/client';
-import { MapMarker } from './MapMarker';
+import { RadarOverlay } from './RadarOverlay';
 import { HorizontalTimeline } from './HorizontalTimeline';
 import { AreaChart } from './AreaChart';
 import { parseEnergyData, parseWaterData, ConsumptionData } from '@/data/virginiaDataCenters';
@@ -88,14 +88,6 @@ export const DataCenterMap = () => {
     }
   }, [mapboxToken, shouldLoadMap]);
 
-  const handleMarkerHover = useCallback((dc: DataCenter | null) => {
-    setHoveredDataCenter(dc);
-  }, []);
-
-  const handleMarkerMouseMove = useCallback((x: number, y: number) => {
-    setMousePosition({ x, y });
-  }, []);
-
   useEffect(() => {
     if (isMapReady && map.current) {
       // Clear existing markers
@@ -105,17 +97,32 @@ export const DataCenterMap = () => {
       // Add markers for each data center (filtered by year)
       filteredDataCenters.forEach((dc) => {
         const el = document.createElement('div');
+        el.style.width = '100px';
+        el.style.height = '100px';
+        el.style.cursor = 'pointer';
+        el.style.display = 'flex';
+        el.style.alignItems = 'center';
+        el.style.justifyContent = 'center';
+        el.style.pointerEvents = 'auto';
+
         const dcColor = getColorForYear(dc.yearOperational);
         const root = createRoot(el);
-        
-        root.render(
-          <MapMarker
-            dataCenter={dc}
-            color={dcColor}
-            onHover={handleMarkerHover}
-            onMouseMove={handleMarkerMouseMove}
-          />
-        );
+        root.render(<RadarOverlay dataCenter={dc} isHovered={false} color={dcColor} />);
+
+        el.addEventListener('mouseenter', (e) => {
+          setHoveredDataCenter(dc);
+          setMousePosition({ x: e.clientX, y: e.clientY });
+          root.render(<RadarOverlay dataCenter={dc} isHovered={true} color={dcColor} />);
+        });
+
+        el.addEventListener('mouseleave', () => {
+          setHoveredDataCenter(null);
+          root.render(<RadarOverlay dataCenter={dc} isHovered={false} color={dcColor} />);
+        });
+
+        el.addEventListener('mousemove', (e) => {
+          setMousePosition({ x: e.clientX, y: e.clientY });
+        });
 
         const marker = new mapboxgl.Marker(el)
           .setLngLat([dc.lng, dc.lat])
@@ -124,7 +131,7 @@ export const DataCenterMap = () => {
         markersRef.current.push(marker);
       });
     }
-  }, [isMapReady, selectedYear, filteredDataCenters, handleMarkerHover, handleMarkerMouseMove]);
+  }, [isMapReady, selectedYear, filteredDataCenters]);
 
   if (!shouldLoadMap) {
     return (
